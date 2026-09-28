@@ -1,6 +1,6 @@
 {
   "name": "dsh-free-search",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Free web search for DeepSeek Harness: 17 engines + global enable/disable and fallback priority + auto smart routing + multi_search cross-source tool + time filtering + platform search + web_fetch, with web settings UI.",
   "type": "module",
   "main": "lib/index.js",
