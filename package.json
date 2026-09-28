@@ -1,7 +1,7 @@
 {
   "name": "dsh-free-search",
   "version": "0.5.5",
-  "description": "Free web search for DeepSeek Harness: 17 engines + selectable Multi Search default mode + global enable/disable and fallback priority + auto smart routing + time filtering + platform search + web_fetch.",
+  "description": "DeepSeek Harness search plugin focused on Exa + AnySearch, with Multi Search, global engine controls, custom fallback priority, auto routing, compact dynamic prompts, and web settings UI.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -36,7 +36,8 @@
     "aliyun",
     "youcom",
     "multi-search",
-    "auto-routing"
+    "auto-routing",
+    "anysearch"
   ],
   "license": "MIT",
   "publishConfig": {
@@ -44,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/DDDMUC/dsh-free-search.git"
+    "url": "https://github.com/Soulize/dsh-free-search.git"
   },
   "engines": {
     "node": ">=20"
