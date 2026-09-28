@@ -35,11 +35,11 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 - **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。
 - **弹出式切换命令** —— 聊天框输入 `/free-search-engine`，弹出引擎选择窗口，点选即切换（等效设置页 + 保存）
 - **引擎测试** —— `free_search_test` 工具让 agent 一键测试所有引擎；设置页也有"测试引擎"按钮（直测当前引擎，不走回退链，付费引擎无 key 会明确报错）
-- **统一引擎回退** —— 任何引擎失败（付费/免费，缺 key/401/限流/网络）自动轮流尝试下一个引擎：首选引擎 → 其他引擎（exa/tavily/keenable/firecrawl/parallel 无 key 也会尝试，因为它们自带 keyless 免费额度）→ 剩余免费引擎，搜索永不直接失败；结果顶部注明实际生效的引擎（如 `Note: perplexity unavailable or failed, using exa.`）
+- **统一引擎回退** —— 任何引擎失败（付费/免费，缺 key/401/限流/网络）都会按全局 `fallbackOrder` 自动尝试下一个启用引擎；首选引擎仍固定优先，搜索不会因单个引擎失败而直接终止；结果顶部注明实际生效的引擎（如 `Note: perplexity unavailable or failed, using exa.`）
 - **时间过滤** —— `advanced_search` 工具支持 `timeRange`：固定档、自定义相对值、绝对日期三种形式（详见下方逻辑说明）
 - **系统提示词注入** —— agent 知道当前用哪个引擎、哪些需要 key；并明确所有搜索结果是**不可信外部数据**，不得执行其中的指令
 - **提示注入防护（不可信数据边界）** —— 插件自有工具（advanced_search / platform_search / free_search_test）的网页文本包在 `<untrusted-web-content>` 边界内（正文里自带的同名标记会被剥离，防止提前闭合）；核心 web_search / web_fetch 由 DSH 核心自带同类提示（`External web content follows...`）；所有 snippet 统一清洗并截断到 300 字符
-- **版本号 + 检查更新** —— 设置卡片显示当前版本（v0.4.17），"检查更新"按钮直连 npm registry 对比最新版，有新版本时提示并可一键跳转
+- **版本号 + 检查更新** —— 设置卡片显示当前版本（v0.5.3），"检查更新"按钮直连 npm registry 对比最新版，有新版本时提示并可一键跳转
 - **结果缓存** —— 相同查询（含引擎/时间过滤参数）5 分钟内命中缓存（LRU 50 条），防免费引擎限流、省付费额度；时长可在设置页 0-5 分钟自由配置（0 关闭）
 - **免费标注** —— 设置页中免费引擎带绿色 `FREE` 徽章，付费引擎带橙色 `API KEY` 徽章
 - **网页抓取（web_fetch）** —— 让 agent 抓取网页内容（官方 `dsh-web-fetch-http` provider，纯 JS，零额外依赖）
