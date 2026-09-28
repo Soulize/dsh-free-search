@@ -31,7 +31,8 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 - **零成本** —— 多个免费引擎，无需 key、无需注册
 - **多引擎可选**：DuckDuckGo（html/lite）、Bing、SearXNG（元搜索，支持自定义实例）、AnySearch、Exa、Tavily、Keenable、Firecrawl、Parallel、Perplexity、SerpBase、DeepSeek 官方、You.com
 - **网页设置页** —— 引擎切换 + API key 配置（UI 中 key 脱敏显示"已配置"）+ 中英文切换；入口在左侧「插件」页的组件行配置（`plugins.row.config`，DSH 0.1.7-rc.1+）
-- **全局禁用搜索引擎（此 fork）** —— 设置页可逐个取消勾选引擎；禁用后会从普通 web_search 回退链、Auto 智能路由、advanced_search、multi_search、引擎测试和 /free-search-engine 选择器中排除。\n- **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。
+- **全局禁用搜索引擎（此 fork）** —— 设置页可逐个取消勾选引擎；禁用后会从普通 web_search 回退链、Auto 智能路由、advanced_search、multi_search、引擎测试和 /free-search-engine 选择器中排除。
+- **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。
 - **弹出式切换命令** —— 聊天框输入 `/free-search-engine`，弹出引擎选择窗口，点选即切换（等效设置页 + 保存）
 - **引擎测试** —— `free_search_test` 工具让 agent 一键测试所有引擎；设置页也有"测试引擎"按钮（直测当前引擎，不走回退链，付费引擎无 key 会明确报错）
 - **统一引擎回退** —— 任何引擎失败（付费/免费，缺 key/401/限流/网络）自动轮流尝试下一个引擎：首选引擎 → 其他引擎（exa/tavily/keenable/firecrawl/parallel 无 key 也会尝试，因为它们自带 keyless 免费额度）→ 剩余免费引擎，搜索永不直接失败；结果顶部注明实际生效的引擎（如 `Note: perplexity unavailable or failed, using exa.`）
@@ -154,7 +155,8 @@ dsh web
 
 配置页提供：
 
-- **Search engine**：下拉框切换引擎，保存即生效\n- **Global fallback priority**：用 ↑/↓ 调整全局回退顺序；禁用引擎仍保留排序位置，重新启用后继续沿用
+- **Search engine**：下拉框切换引擎，保存即生效
+- **Global fallback priority**：用 ↑/↓ 调整全局回退顺序；禁用引擎仍保留排序位置，重新启用后继续沿用
 - **API keys**：为 Exa / Tavily / Keenable / Firecrawl / Parallel / Perplexity / DeepSeek / SerpBase / You.com 填写 key（密码框，保存后只显示"已配置"；Exa / Tavily / Keenable / Firecrawl / Parallel 不填也可免 key 使用）
   - **推荐**：付费引擎 key 建议写入 harness 凭据中心 `~/.dsh/.credentials.yaml`（如 `DEEPSEEK_API_KEY: sk-...`，与官方 LLM provider 一致，一处管理所有 key）。插件读取优先级：凭据中心 > 设置页 > 环境变量，设置页填的 key 仅作为遗留兼容。
 - **Test engine**：直测当前引擎可用性（不走回退链，付费引擎无 key 会明确报错）
@@ -194,7 +196,16 @@ DSH 0.1.7-rc.1 起，配置跟随 profile 的插件条目保存：设置页与 `
 ```yaml
 # profiles/<profile>/cordis.patch.yml 中该条目的 config：
 provider: bing              # ddg / ddg-lite / bing / searxng / anysearch / exa / tavily / keenable / firecrawl / parallel / perplexity / serpbase / deepseek-official / you
-disabledEngines: []       # 此 fork：全局禁用的引擎 id 列表\nfallbackOrder:              # 此 fork：全局回退优先级（从上到下）\n  - exa\n  - tavily\n  - bing\n  - anysearch\n  - ddg\n  - ddg-lite\n  - searxng\nlang: zh                    # 设置页界面语言（zh / en）
+disabledEngines: []       # 此 fork：全局禁用的引擎 id 列表
+fallbackOrder:              # 此 fork：全局回退优先级（从上到下）
+  - exa
+  - tavily
+  - bing
+  - anysearch
+  - ddg
+  - ddg-lite
+  - searxng
+lang: zh                    # 设置页界面语言（zh / en）
 bingMarket: zh-CN           # Bing 市场
 region: cn-zh               # DuckDuckGo 区域（可选）
 searxngInstances:           # 自定义 SearXNG 实例（可选）
