@@ -12,13 +12,13 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.9)(@deepseek-ai/cordis-plugin-loader@1.0.5)
       '@deepseek-ai/dsh-client-ui-commands':
-        specifier: ^0.1.7-rc.1
+        specifier: '>=0.1.7-rc.1'
         version: 0.1.7-rc.1(@deepseek-ai/cordis@4.0.1)
       '@deepseek-ai/dsh-client-ui-plugin-manager':
-        specifier: ^0.1.7-rc.1
+        specifier: '>=0.1.7-rc.1'
         version: 0.1.7-rc.1(@deepseek-ai/cordis@4.0.1)
       '@deepseek-ai/dsh-client-ui-renderer':
-        specifier: ^0.1.7-rc.1
+        specifier: '>=0.1.7-rc.1'
         version: 0.1.7-rc.1(@deepseek-ai/cordis@4.0.1)
       '@deepseek-ai/schemastery':
         specifier: ^3.18.4
@@ -28,10 +28,10 @@ importers:
         version: 18.3.1
     devDependencies:
       '@deepseek-ai/dsh-settings':
-        specifier: ^0.1.7-rc.1
+        specifier: '>=0.1.7-rc.1'
         version: 0.1.7-rc.1(2d633eb9ac21e11e6bb807dcb2b6f404)
       '@deepseek-ai/dsh-tools':
-        specifier: ^0.1.7-rc.1
+        specifier: '>=0.1.7-rc.1'
         version: 0.1.7-rc.1(c88bee8666724fd6822e3db5e7499f93)
 
 packages:
