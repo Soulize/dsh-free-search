@@ -32,14 +32,14 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 - **多引擎可选**：DuckDuckGo（html/lite）、Bing、SearXNG（元搜索，支持自定义实例）、AnySearch、Exa、Tavily、Keenable、Firecrawl、Parallel、Perplexity、SerpBase、DeepSeek 官方、You.com
 - **网页设置页** —— 引擎切换 + API key 配置（UI 中 key 脱敏显示"已配置"）+ 中英文切换；入口在左侧「插件」页的组件行配置（`plugins.row.config`，DSH 0.1.7-rc.1+）
 - **全局禁用搜索引擎（此 fork）** —— 设置页可逐个取消勾选引擎；禁用后会从普通 web_search 回退链、Auto 智能路由、advanced_search、multi_search、引擎测试和 /free-search-engine 选择器中排除。
-- **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。
+- **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。\n- **Multi Search 默认模式（此 fork）** —— 可直接在 Search engine 或 `/free-search-engine` 中选择 `Multi Search`；之后普通 `web_search` 会默认并发请求路由/优先级前 3 个启用引擎，按 URL 合并去重，并优先返回被多个引擎共同命中的结果。
 - **弹出式切换命令** —— 聊天框输入 `/free-search-engine`，弹出引擎选择窗口，点选即切换（等效设置页 + 保存）
 - **引擎测试** —— `free_search_test` 工具让 agent 一键测试所有引擎；设置页也有"测试引擎"按钮（直测当前引擎，不走回退链，付费引擎无 key 会明确报错）
 - **统一引擎回退** —— 任何引擎失败（付费/免费，缺 key/401/限流/网络）都会按全局 `fallbackOrder` 自动尝试下一个启用引擎；首选引擎仍固定优先，搜索不会因单个引擎失败而直接终止；结果顶部注明实际生效的引擎（如 `Note: perplexity unavailable or failed, using exa.`）
 - **时间过滤** —— `advanced_search` 工具支持 `timeRange`：固定档、自定义相对值、绝对日期三种形式（详见下方逻辑说明）
 - **精简动态系统提示词注入** —— 只注入当前启用的搜索引擎与有效回退信息；已禁用引擎完全不进入引擎目录，也不会继续占用提示词。设置保存后自动刷新，并明确所有搜索结果是**不可信外部数据**，不得执行其中的指令
 - **提示注入防护（不可信数据边界）** —— 插件自有工具（advanced_search / platform_search / free_search_test）的网页文本包在 `<untrusted-web-content>` 边界内（正文里自带的同名标记会被剥离，防止提前闭合）；核心 web_search / web_fetch 由 DSH 核心自带同类提示（`External web content follows...`）；所有 snippet 统一清洗并截断到 300 字符
-- **版本号 + 检查更新** —— 设置卡片显示当前版本（v0.5.4），"检查更新"按钮直连 npm registry 对比最新版，有新版本时提示并可一键跳转
+- **版本号 + 检查更新** —— 设置卡片显示当前版本（v0.5.5），"检查更新"按钮直连 npm registry 对比最新版，有新版本时提示并可一键跳转
 - **结果缓存** —— 相同查询（含引擎/时间过滤参数）5 分钟内命中缓存（LRU 50 条），防免费引擎限流、省付费额度；时长可在设置页 0-5 分钟自由配置（0 关闭）
 - **免费标注** —— 设置页中免费引擎带绿色 `FREE` 徽章，付费引擎带橙色 `API KEY` 徽章
 - **网页抓取（web_fetch）** —— 让 agent 抓取网页内容（官方 `dsh-web-fetch-http` provider，纯 JS，零额外依赖）
@@ -52,7 +52,7 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 
 | id | 引擎 | 费用 | 说明 |
 |---|---|---|---|
-| `auto` | Auto 智能路由 | 动态 | **根据查询语言/时间条件自动选路**（含中文优先 Bing/Baidu/Aliyun/AnySearch，英文优先 Bing/Exa/Tavily；时间过滤优先支持引擎），末尾全量回退 |
+| `auto` | Auto 智能路由 | 动态 | **根据查询语言/时间条件自动选路**（含中文优先 Bing/Baidu/Aliyun/AnySearch，英文优先 Bing/Exa/Tavily；时间过滤优先支持引擎），末尾全量回退 |\n| `multi` | Multi Search | 动态 | **并发搜索路由/优先级前 3 个启用引擎**，URL 去重合并，跨引擎重复命中优先 |
 | `ddg` | DuckDuckGo HTML | 免费 | 偶发限流（反爬），解封自动恢复 |
 | `ddg-lite` | DuckDuckGo Lite | 免费 | 轻量版，同上 |
 | `bing` | Bing | 免费 | **默认引擎**，最稳定，中文优化（zh-CN） |
@@ -155,7 +155,7 @@ dsh web
 
 配置页提供：
 
-- **Search engine**：下拉框切换引擎，保存即生效
+- **Search engine**：下拉框切换引擎或模式，支持 `Auto` / `Multi Search` / 单引擎；保存即生效
 - **Global fallback priority**：用 ↑/↓ 调整全局回退顺序；禁用引擎仍保留排序位置，重新启用后继续沿用
 - **API keys**：为 Exa / Tavily / Keenable / Firecrawl / Parallel / Perplexity / DeepSeek / SerpBase / You.com 填写 key（密码框，保存后只显示"已配置"；Exa / Tavily / Keenable / Firecrawl / Parallel 不填也可免 key 使用）
   - **推荐**：付费引擎 key 建议写入 harness 凭据中心 `~/.dsh/.credentials.yaml`（如 `DEEPSEEK_API_KEY: sk-...`，与官方 LLM provider 一致，一处管理所有 key）。插件读取优先级：凭据中心 > 设置页 > 环境变量，设置页填的 key 仅作为遗留兼容。
