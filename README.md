@@ -1,6 +1,8 @@
-# dsh-free-search
+# dsh-free-search · Soulize fork
 
-**DeepSeek Harness 免费搜索插件 —— 无需 API key，零成本，多引擎可切换。** 一个给 DeepSeek Harness (dsh) 添加多引擎搜索 provider 的插件，注册进 `ctx.web` seam。内置 `web_search` 工具自动选用，支持网页设置页切换引擎、配置 API key、一键测试所有引擎、弹出式命令切换引擎。
+**DeepSeek Harness 搜索增强插件，主力围绕 Exa + AnySearch，支持 Multi Search、全局引擎开关与优先级、自动回退，以及精简的动态系统提示词。**
+
+> 基于 [DDDMUC/dsh-free-search](https://github.com/DDDMUC/dsh-free-search) 深度改造。这个 fork 已在搜索路由、设置 UI、多引擎并发、fallback 策略、提示词注入和 DSH 版本兼容等方面与上游产生较大差异；后续功能与行为以本仓库为准。
 
 [中文](#中文) · [English](#english)
 
@@ -9,8 +11,8 @@
 ## 中文
 
 <div align="center">
-  <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free1.png">
-    <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free1.png" alt="免费引擎设置 (Bing)" width="820" />
+  <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png">
+    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="免费引擎设置 (Bing)" width="820" />
   </a>
   <br>
   <sub>▲ 免费引擎（以Bing为例）</sub>
@@ -24,35 +26,33 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 
 ……那么内置搜索必然失败，agent 会告诉你"无法联网"。
 
-这个插件提供多个免费引擎 + 自动回退，彻底摆脱 DeepSeek 官方 key 的依赖。
+这个 fork 不以“堆最多引擎”为主要目标，而是把 **Exa + AnySearch** 作为主力免费搜索组合，其它引擎作为可选 fallback 或交叉验证来源；路由、并发合并、失败回退和提示词成本控制都由插件统一处理。
 
 ### 特性
 
-- **零成本** —— 多个免费引擎，无需 key、无需注册
-- **多引擎可选**：DuckDuckGo（html/lite）、Bing、SearXNG（元搜索，支持自定义实例）、AnySearch、Exa、Tavily、Keenable、Firecrawl、Parallel、Perplexity、SerpBase、DeepSeek 官方、You.com
-- **网页设置页** —— 引擎切换 + API key 配置（UI 中 key 脱敏显示"已配置"）+ 中英文切换；入口在左侧「插件」页的组件行配置（`plugins.row.config`，DSH 0.1.7-rc.1+）
-- **全局禁用搜索引擎（此 fork）** —— 设置页可逐个取消勾选引擎；禁用后会从普通 web_search 回退链、Auto 智能路由、advanced_search、multi_search、引擎测试和 /free-search-engine 选择器中排除。
-- **全局回退优先级（此 fork）** —— 设置页可用 ↑/↓ 调整 `fallbackOrder`；首选引擎仍先尝试，之后按该顺序回退。Auto 保留语言/时间路由，并在自定义后按该顺序排列同组及后续候选。\n- **Multi Search 默认模式（此 fork）** —— 可直接在 Search engine 或 `/free-search-engine` 中选择 `Multi Search`；之后普通 `web_search` 会默认并发请求路由/优先级前 3 个启用引擎，按 URL 合并去重，并优先返回被多个引擎共同命中的结果。
-- **弹出式切换命令** —— 聊天框输入 `/free-search-engine`，弹出引擎选择窗口，点选即切换（等效设置页 + 保存）
-- **引擎测试** —— `free_search_test` 工具让 agent 一键测试所有引擎；设置页也有"测试引擎"按钮（直测当前引擎，不走回退链，付费引擎无 key 会明确报错）
-- **统一引擎回退** —— 任何引擎失败（付费/免费，缺 key/401/限流/网络）都会按全局 `fallbackOrder` 自动尝试下一个启用引擎；首选引擎仍固定优先，搜索不会因单个引擎失败而直接终止；结果顶部注明实际生效的引擎（如 `Note: perplexity unavailable or failed, using exa.`）
-- **时间过滤** —— `advanced_search` 工具支持 `timeRange`：固定档、自定义相对值、绝对日期三种形式（详见下方逻辑说明）
-- **精简动态系统提示词注入** —— 只注入当前启用的搜索引擎与有效回退信息；已禁用引擎完全不进入引擎目录，也不会继续占用提示词。设置保存后自动刷新，并明确所有搜索结果是**不可信外部数据**，不得执行其中的指令
-- **提示注入防护（不可信数据边界）** —— 插件自有工具（advanced_search / platform_search / free_search_test）的网页文本包在 `<untrusted-web-content>` 边界内（正文里自带的同名标记会被剥离，防止提前闭合）；核心 web_search / web_fetch 由 DSH 核心自带同类提示（`External web content follows...`）；所有 snippet 统一清洗并截断到 300 字符
-- **版本号 + 检查更新** —— 设置卡片显示当前版本（v0.5.5），"检查更新"按钮直连 npm registry 对比最新版，有新版本时提示并可一键跳转
-- **结果缓存** —— 相同查询（含引擎/时间过滤参数）5 分钟内命中缓存（LRU 50 条），防免费引擎限流、省付费额度；时长可在设置页 0-5 分钟自由配置（0 关闭）
-- **免费标注** —— 设置页中免费引擎带绿色 `FREE` 徽章，付费引擎带橙色 `API KEY` 徽章
-- **网页抓取（web_fetch）** —— 让 agent 抓取网页内容（官方 `dsh-web-fetch-http` provider，纯 JS，零额外依赖）
-- **平台搜索（platform_search）** —— 搜 GitHub / V2EX / B站 / Reddit / Hacker News / Stack Overflow / 维基百科 / npm（公开 API，零依赖）
-- **干净集成** —— 实现官方 `WebSearchProvider` seam 接口，与官方插件共存
+- **Exa + AnySearch 优先** —— 这是本 fork 的主要使用组合：Exa 负责高质量语义检索，AnySearch 作为轻量、免 key 的补充与 fallback；其它引擎保留为可选来源。
+- **Multi Search 默认模式** —— `Multi Search` 可以直接作为普通 `web_search` 的默认模式，并发调用路由/优先级前 3 个启用引擎，按 URL 合并去重，跨引擎重复命中的结果优先。
+- **全局引擎开关** —— 设置页可以逐个禁用引擎；禁用项会从 web_search、Auto、advanced_search、multi_search、测试工具和引擎选择器中统一排除。
+- **全局 fallback 优先级** —— 用 ↑/↓ 调整 `fallbackOrder`。单引擎模式始终先尝试当前首选，失败后严格按全局顺序回退；禁用引擎保留位置但不会执行。
+- **Auto 智能路由** —— 根据查询语言和时间过滤选择候选引擎；只有在你实际自定义过全局顺序后，Auto 才在路由分组和后续 fallback 中应用该顺序。
+- **统一失败回退** —— 缺 key、401、限流、空结果或网络错误都不会立即终止搜索，而是继续尝试下一个启用引擎。
+- **精简动态系统提示词** —— 只注入当前启用引擎与实际有效的回退信息；已禁用引擎不会再把整段说明塞进上下文。Bing/DDG 被禁用后，与它们相关的设置说明也不会注入。
+- **网页设置 UI + `/free-search-engine`** —— 支持默认模式/引擎切换、引擎开关、优先级调整、API key、缓存、Safe Search、Bing market、中英文界面和弹出式命令切换。
+- **高级与多源工具** —— `advanced_search` 支持相对/绝对时间过滤；`multi_search` 可按指定引擎做并发交叉验证；`platform_search` 覆盖 GitHub / V2EX / Bilibili / Reddit / HN / Stack Overflow / Wikipedia / npm。
+- **搜索结果安全处理** —— 插件自有工具的网页文本放进 `<untrusted-web-content>` 边界，统一清洗 snippet，并阻止网页内容伪造边界影响 agent 指令。
+- **缓存与诊断** —— LRU 查询缓存、短 TTL fallback 缓存、`free_search_test` 引擎测试，以及设置页当前引擎直测。
+- **DSH 新版兼容策略** —— 仅设置最低 DSH 版本要求，不锁最高版本；设置项使用 profile-owned volatile config，并在修改后动态刷新提示词。
 
-如果这个插件帮到了你，欢迎给仓库点个 ⭐（[GitHub](https://github.com/DDDMUC/dsh-free-search)）——星标是开发者继续维护的最大动力，感谢支持！
+如果这个 fork 对你有用，可以给 [Soulize/dsh-free-search](https://github.com/Soulize/dsh-free-search) 点个 ⭐。
+
+> 上游来源：[DDDMUC/dsh-free-search](https://github.com/DDDMUC/dsh-free-search)。感谢原作者提供最初的插件结构和多引擎实现基础。
 
 ### 引擎列表
 
 | id | 引擎 | 费用 | 说明 |
 |---|---|---|---|
-| `auto` | Auto 智能路由 | 动态 | **根据查询语言/时间条件自动选路**（含中文优先 Bing/Baidu/Aliyun/AnySearch，英文优先 Bing/Exa/Tavily；时间过滤优先支持引擎），末尾全量回退 |\n| `multi` | Multi Search | 动态 | **并发搜索路由/优先级前 3 个启用引擎**，URL 去重合并，跨引擎重复命中优先 |
+| `auto` | Auto 智能路由 | 动态 | **根据查询语言/时间条件自动选路**（含中文优先 Bing/Baidu/Aliyun/AnySearch，英文优先 Bing/Exa/Tavily；时间过滤优先支持引擎），末尾全量回退 |
+| `multi` | Multi Search | 动态 | **并发搜索路由/优先级前 3 个启用引擎**，URL 去重合并，跨引擎重复命中优先 |
 | `ddg` | DuckDuckGo HTML | 免费 | 偶发限流（反爬），解封自动恢复 |
 | `ddg-lite` | DuckDuckGo Lite | 免费 | 轻量版，同上 |
 | `bing` | Bing | 免费 | **默认引擎**，最稳定，中文优化（zh-CN） |
@@ -71,8 +71,8 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 | `kimi` | Kimi（Moonshot）联网搜索 | 付费 | 需 `MOONSHOT_API_KEY`（basic 约 ￥0.01/次），返回带正文 chunks 的中文结果 |
 | `aliyun` | 阿里云百炼 EnhancedSearch | 付费 | 需 `DASHSCOPE_API_KEY`（MCP search_pro，约 ￥0.03/次，新用户 200 次免费包）；中文全网带来源 hostname |
 
-- **默认引擎为 `bing`**（免费且最稳定），安装后开箱即用。
-- **自动回退**：任何引擎失败（免费限流/反爬，付费缺 key/无效/网络错误）都会自动轮流尝试下一个引擎——先试其他已配 key 的付费引擎，再试免费引擎（Bing/AnySearch 等），并在结果中附带回退提示——搜索不会因引擎问题直接失败。
+- **代码默认仍为 `bing`**，用于无配置开箱即用；本 fork 更推荐把 **`exa` 和 `anysearch`** 放在启用列表与 `fallbackOrder` 前部，或只保留这两个引擎配合 `Multi Search`。
+- **自动回退**：按当前首选模式、全局 `fallbackOrder` 和禁用列表决定实际候选；任一引擎失败会继续尝试下一个启用引擎。`Multi Search` 则并发调用候选并合并结果。
 - **设置页有官网链接**：免费引擎显示"访问官网 →"，付费引擎显示"获取 API Key →"（新标签页打开）：
   - Exa：<https://dashboard.exa.ai/api-keys>
   - Tavily：<https://app.tavily.com/home>
@@ -93,8 +93,18 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 
 ### 安装
 
+推荐直接安装这个 fork 的当前 master：
+
 ```sh
-git clone https://github.com/DDDMUC/dsh-free-search.git
+dsh plugin --profile web add "github:Soulize/dsh-free-search#master"
+```
+
+如果之前已经装过旧提交，显式带 `#master` 可以避免继续命中旧解析/锁定版本。
+
+本地开发也可以：
+
+```sh
+git clone https://github.com/Soulize/dsh-free-search.git
 dsh plugin --profile web add /path/to/dsh-free-search
 ```
 
@@ -129,9 +139,9 @@ dsh web
 - `fetchProvider: http` —— 官方网页抓取（web-fetch-http），请保留；漏掉会导致网页抓取失效或重复注册。
 - 想改回官方搜索：在插件管理器里停用本插件条目即可。
 
-#### 姊妹插件：dsh-preset-workbench（预设工作台）
+#### 上游作者的相关插件：dsh-preset-workbench（预设工作台）
 
-同作者的**姊妹插件**：在设置页里可视化创建/编辑 Agent 预设——分段提示词、15 项能力开关、内置「鲸鱼娘 / 梁神模式」模板，不用手写 YAML。两者搭配：**free-search 解决"AI 联网搜索"、preset-workbench 解决"AI 人设能力编排"**，都是纯免费、开箱即用。
+上游作者维护的相关插件：在设置页里可视化创建/编辑 Agent 预设——分段提示词、15 项能力开关、内置「鲸鱼娘 / 梁神模式」模板，不用手写 YAML。两者搭配：**free-search 解决"AI 联网搜索"、preset-workbench 解决"AI 人设能力编排"**，都是纯免费、开箱即用。
 
 - 仓库：<https://github.com/DDDMUC/dsh-preset-workbench>
 - 安装：`dsh plugin --profile web add github:DDDMUC/dsh-preset-workbench`
@@ -167,15 +177,15 @@ dsh web
 <table align="center" style="border: none; border-collapse: collapse;">
   <tr style="border: none;">
     <td align="center" width="50%" style="border: none; padding: 6px;">
-      <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free.png">
-        <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free.png" alt="免费引擎设置" width="100%" />
+      <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free.png">
+        <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free.png" alt="免费引擎设置" width="100%" />
       </a>
       <br>
       <sub>▲ <b>免费引擎</b>（显示绿色 FREE 徽章与官网链接）</sub>
     </td>
     <td align="center" width="50%" style="border: none; padding: 6px;">
-      <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-apikey.png">
-        <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-apikey.png" alt="付费引擎设置" width="100%" />
+      <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-apikey.png">
+        <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-apikey.png" alt="付费引擎设置" width="100%" />
       </a>
       <br>
       <sub>▲ <b>付费/API Key 引擎</b>（显示橙色 API KEY 徽章与获取链接）</sub>
@@ -332,8 +342,8 @@ Windows 用户：桌面快捷方式已内置此配置（`set NODE_USE_ENV_PROXY=
 ## English
 
 <div align="center">
-  <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free1.png">
-    <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free1.png" alt="Free Engine Settings (Bing)" width="820" />
+  <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png">
+    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="Free Engine Settings (Bing)" width="820" />
   </a>
   <br>
   <sub>▲ Free engine (using Bing as an example)</sub>
@@ -347,27 +357,26 @@ dsh's default search provider relies on the official DeepSeek API key (`DEEPSEEK
 
 ...then the built-in search will inevitably fail, and the agent will tell you "I cannot access the internet."
 
-This plugin provides multiple free search engines with automatic fallback, completely freeing you from relying on DeepSeek's official key.
+This fork is not primarily about adding the largest possible engine list. Its main workflow is **Exa + AnySearch**, with the remaining engines kept as optional fallbacks or cross-checking sources. Routing, concurrent merge, failover, and prompt-budget control are handled centrally by the plugin.
 
 ### Features
 
-- **Zero Cost** — Multiple free engines with no API key or registration required
-- **Multi-Engine Support** — DuckDuckGo (HTML / Lite), Bing, AnySearch AI, SearXNG (meta-search with custom instances), Exa, Tavily, Keenable, Firecrawl, Parallel, Perplexity, SerpBase, DeepSeek Official, and You.com
-- **Web Settings UI** — Engine switching, API key configuration (keys masked as "configured" in the UI), and a Chinese/English toggle; the entry is the component-row config (`plugins.row.config`) on the sidebar Plugins page (DSH 0.1.7-rc.1+)
-- **Popup Switch Command** — Type `/free-search-engine` in the chat: a picker opens with all engines; click one to switch (equivalent to the settings page + save)
-- **Engine Testing** — `free_search_test` for the agent to check all engines in one call; the settings UI also has a "Test engine" button that tests the selected engine directly (no fallback chain; paid engines without a key report an explicit error)
-- **Unified Engine Fallback** — Any engine failure (paid or free, missing key, 401, rate limit, network error) automatically tries the next engine: the configured engine first, then other engines (exa/tavily/keenable/firecrawl/parallel are tried even without a key because they have built-in keyless quota), then the remaining free engines (Bing/AnySearch etc.) — with a note attached to the results naming the engine that actually served them (e.g. `Note: perplexity unavailable or failed, using exa.`). Search never fails outright.
-- **Time Filtering** — The `advanced_search` tool supports `timeRange`: fixed tiers, custom relative values, or an absolute date (details below)
-- **System Prompt Injection** — The agent is aware of the currently active engine and which engines require API keys; it is also told that all search output is **untrusted external data** and must never be executed as instructions
-- **Prompt-Injection Guard (untrusted-data boundary)** — Web-derived text from the plugin's own tools (`advanced_search` / `platform_search` / `free_search_test`) is wrapped in an explicit `<untrusted-web-content>` boundary (look-alike tags inside the text are stripped to prevent early closure); the core `web_search` / `web_fetch` tools carry DSH core's own notice (`External web content follows...`); every snippet is cleaned and capped at 300 characters
-- **Version + Update Check** — The settings card shows the current version (v0.4.17), and a "Check update" button queries the npm registry to compare against the latest release, prompting a one-click jump when a newer version exists
-- **Result Caching** — Identical queries (same engine / time-filter args) hit an LRU cache (50 entries) for up to 5 minutes, protecting free engines from rate-limiting and saving paid quota; the TTL is configurable from 0-5 minutes in the settings UI (0 disables caching)
-- **Visual Badges** — Free engines feature a green `FREE` badge, while paid engines show an orange `API KEY` badge in the settings UI
-- **Webpage Fetching (`web_fetch`)** — Allows the agent to read full webpage contents (official `dsh-web-fetch-http` provider, pure JS, zero extra dependencies)
-- **Platform Search (`platform_search`)** — Search GitHub / V2EX / Bilibili / Reddit / Hacker News / Stack Overflow / Wikipedia / npm (public APIs, zero extra dependencies)
-- **Clean Integration** — Implements the official `WebSearchProvider` seam interface, coexisting seamlessly with official plugins
+- **Exa + AnySearch focused** — The primary workflow in this fork. Exa is the high-quality semantic search path; AnySearch is a lightweight keyless companion and fallback. Other engines remain available as optional sources.
+- **Selectable Multi Search default mode** — Set `Multi Search` as the normal `web_search` mode. It queries the top 3 enabled routed/prioritized engines concurrently, merges duplicate URLs, and prioritizes results confirmed by multiple engines.
+- **Global engine enable/disable** — Disable individual engines once and they are excluded consistently from web_search fallback, Auto routing, advanced_search, multi_search, engine tests, and the engine picker.
+- **Global fallback priority** — Reorder `fallbackOrder` with ↑/↓ controls. Single-engine mode always tries the selected engine first, then follows the configured order. Disabled engines retain their position but are skipped.
+- **Auto routing** — Language/time-aware engine routing. The original Auto behavior stays unchanged until you actually customize the global priority; then that order is applied within routing groups and the remaining fallback chain.
+- **Unified failover** — Missing keys, 401s, rate limits, empty results, and network errors continue to the next enabled engine instead of terminating search immediately.
+- **Compact dynamic system prompt** — Only enabled engines and effective fallback information are injected. Disabled-engine catalog noise is removed from context, and Bing/DDG-specific lines disappear when those engines are disabled.
+- **Web settings UI + `/free-search-engine`** — Configure modes/engines, global enable state, fallback priority, API keys, cache, Safe Search, Bing market, UI language, and the popup engine switcher.
+- **Advanced and multi-source tools** — `advanced_search` adds relative/absolute time filtering; `multi_search` performs explicit concurrent cross-engine validation; `platform_search` covers GitHub / V2EX / Bilibili / Reddit / HN / Stack Overflow / Wikipedia / npm.
+- **Search-output safety** — Plugin-owned search output is wrapped in `<untrusted-web-content>`, snippets are normalized, and look-alike boundary tags from webpages are stripped.
+- **Caching and diagnostics** — LRU query cache, shorter TTLs for fallback hits, `free_search_test`, and direct testing of the selected engine from Settings.
+- **Forward-compatible DSH versioning** — Only a minimum DSH version is enforced; profile-owned volatile settings refresh runtime behavior and the injected prompt dynamically.
 
-If this plugin has been helpful, a ⭐ on [GitHub](https://github.com/DDDMUC/dsh-free-search) would mean a lot — it's the biggest motivation for the developer to keep maintaining it. Thank you!
+If this fork is useful to you, consider starring [Soulize/dsh-free-search](https://github.com/Soulize/dsh-free-search).
+
+> Upstream: [DDDMUC/dsh-free-search](https://github.com/DDDMUC/dsh-free-search). Thanks to the original author for the initial plugin structure and multi-engine foundation.
 
 ### Supported Engines
 
@@ -392,8 +401,8 @@ If this plugin has been helpful, a ⭐ on [GitHub](https://github.com/DDDMUC/dsh
 | `kimi` | Kimi (Moonshot) Web Search | Paid | Requires `MOONSHOT_API_KEY` (basic ~¥0.01/call); returns Chinese results with body chunks |
 | `aliyun` | Aliyun Bailian EnhancedSearch | Paid | Requires `DASHSCOPE_API_KEY` (MCP search_pro, ~¥0.03/call, 200 free calls for new users); Chinese web-wide with source hostnames |
 
-- **Default engine is `bing`** (free and most stable), ready to use out of the box after installation.
-- **Auto-failover**: any engine failure (rate-limited free engine, or missing/invalid paid key, network error) automatically tries the next engine — the configured engine first, then other engines (exa/tavily/keenable/firecrawl/parallel are tried even without a key because they have built-in keyless quota), then the remaining free engines (Bing/AnySearch etc.) — with a note attached to the results naming the engine that actually served them (e.g. `Note: perplexity unavailable or failed, using exa.`). Search never fails outright because of engine issues.
+- **The code default remains `bing`** for zero-config startup, but this fork is primarily tuned around **`exa` + `anysearch`**. Put them near the front of the enabled list / `fallbackOrder`, or keep only those two for a lean Multi Search setup.
+- **Auto-failover**: the effective candidate order comes from the selected mode, global `fallbackOrder`, and the disabled-engine list. A failed engine continues to the next enabled candidate; Multi Search queries candidates concurrently and merges the successful results.
 - **Official Links in Settings**: Free engines display "Visit Website →", while paid engines display "Get API Key →" (opens in a new tab):
   - Exa: <https://dashboard.exa.ai/api-keys>
   - Tavily: <https://app.tavily.com/home>
@@ -414,8 +423,18 @@ If this plugin has been helpful, a ⭐ on [GitHub](https://github.com/DDDMUC/dsh
 
 ### Installation
 
+Recommended: install the current master of this fork directly:
+
 ```sh
-git clone https://github.com/DDDMUC/dsh-free-search.git
+dsh plugin --profile web add "github:Soulize/dsh-free-search#master"
+```
+
+If an older commit is already installed, the explicit `#master` ref helps avoid reusing the previous locked resolution.
+
+For local development:
+
+```sh
+git clone https://github.com/Soulize/dsh-free-search.git
 dsh plugin --profile web add /path/to/dsh-free-search
 ```
 
@@ -450,9 +469,9 @@ To declare it explicitly, or to switch over from another provider (`profiles/<pr
 - `fetchProvider: http` — the official web-fetch provider; keep it, or page fetching breaks or double-registers.
 - To go back to official search: disable this plugin's entry in the plugin manager.
 
-#### Sister Plugin: dsh-preset-workbench
+#### Related project from the upstream author: dsh-preset-workbench
 
-A **sister plugin** by the same author: a **visual workbench for creating/editing agent presets** right inside Settings — sectioned prompts, 15 capability toggles, and built-in "Whale Girl / Liangshen Mode" templates, no YAML needed. Pair them up: **free-search gives your AI web search, preset-workbench shapes its persona & capabilities** — both free and zero-config.
+A related plugin maintained by the upstream author: a **visual workbench for creating/editing agent presets** right inside Settings — sectioned prompts, 15 capability toggles, and built-in "Whale Girl / Liangshen Mode" templates, no YAML needed. Pair them up: **free-search gives your AI web search, preset-workbench shapes its persona & capabilities** — both free and zero-config.
 
 - Repo: <https://github.com/DDDMUC/dsh-preset-workbench>
 - Install: `dsh plugin --profile web add github:DDDMUC/dsh-preset-workbench`
@@ -487,15 +506,15 @@ The config page provides:
 <table align="center" style="border: none; border-collapse: collapse;">
   <tr style="border: none;">
     <td align="center" width="50%" style="border: none; padding: 6px;">
-      <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free.png">
-        <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-free.png" alt="Free Engine Settings" width="100%" />
+      <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free.png">
+        <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free.png" alt="Free Engine Settings" width="100%" />
       </a>
       <br>
       <sub>▲ <b>Free Engine</b> (shows green FREE badge and official website link)</sub>
     </td>
     <td align="center" width="50%" style="border: none; padding: 6px;">
-      <a href="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-apikey.png">
-        <img src="https://raw.githubusercontent.com/DDDMUC/dsh-free-search/master/assets/settings-apikey.png" alt="Paid/API Key Engine Settings" width="100%" />
+      <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-apikey.png">
+        <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-apikey.png" alt="Paid/API Key Engine Settings" width="100%" />
       </a>
       <br>
       <sub>▲ <b>Paid / API Key Engine</b> (shows orange API KEY badge and link to get an API key)</sub>
