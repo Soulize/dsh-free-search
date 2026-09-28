@@ -139,6 +139,8 @@ dsh web
 
 #### 依赖说明
 
+> 此 fork 仅要求 DSH `>=0.1.7-rc.1`，不设置最高版本上限。
+
 插件对 `@deepseek-ai/dsh-settings` 和 `@deepseek-ai/dsh-tools` 使用 `peerDependencies`，这是刻意的：DSH 运行时必须使用安装树中的唯一实例。请通过 `dsh plugin --profile <profile> add ...` 安装插件，不要把 DSH 核心包复制进 profile 的本地 `node_modules`；重复副本会导致工具调度器失效。
 
 ### 使用
@@ -447,6 +449,8 @@ A **sister plugin** by the same author: a **visual workbench for creating/editin
 If preset-workbench is useful to you too, a ⭐ on its repo is always welcome. 🙏
 
 #### Dependency Note
+
+> This fork requires only DSH `>=0.1.7-rc.1`; no upper DSH version bound is enforced.
 
 This plugin intentionally specifies `@deepseek-ai/dsh-settings` and `@deepseek-ai/dsh-tools` as `peerDependencies`: the DSH runtime must use a single instance from the installation tree. Always install the plugin using `dsh plugin --profile <profile> add ...`. Do **not** copy DSH core packages into a profile-local `node_modules`, as duplicate copies can break the tool scheduler.
 
