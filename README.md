@@ -12,10 +12,10 @@
 
 <div align="center">
   <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png">
-    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="免费引擎设置 (Bing)" width="820" />
+    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="Free Search 设置页" width="820" />
   </a>
   <br>
-  <sub>▲ 免费引擎（以Bing为例）</sub>
+  <sub>▲ Free Search 设置页</sub>
 </div>
 
 ### 为什么需要它
@@ -55,10 +55,10 @@ dsh 默认的搜索 provider 依赖 DeepSeek 官方 API key（`DEEPSEEK_API_KEY`
 | `multi` | Multi Search | 动态 | **并发搜索路由/优先级前 3 个启用引擎**，URL 去重合并，跨引擎重复命中优先 |
 | `ddg` | DuckDuckGo HTML | 免费 | 偶发限流（反爬），解封自动恢复 |
 | `ddg-lite` | DuckDuckGo Lite | 免费 | 轻量版，同上 |
-| `bing` | Bing | 免费 | **默认引擎**，最稳定，中文优化（zh-CN） |
-| `anysearch` | AnySearch AI | 免费 | AI 搜索，无 key（匿名额度） |
+| `bing` | Bing | 免费 | **代码默认/兼容兜底**，中文优化（zh-CN） |
+| `anysearch` | AnySearch AI | 免费 | **本 fork 推荐主力**，轻量 AI 搜索，无 key（匿名额度） |
 | `searxng` | SearXNG 元搜索 | 免费 | 多实例自动切换，支持自定义实例 |
-| `exa` | Exa | 免费 | **无 key 也可用**（MCP 匿名），配 key 提升额度 |
+| `exa` | Exa | 免费 | **本 fork 推荐主力**，语义检索；无 key 可走 MCP，配 key 提升额度 |
 | `tavily` | Tavily | 免费 | **无 key 也可用**（keyless 匿名），配 key 提升额度 |
 | `keenable` | Keenable | 免费 | **无 key 也可用**（MCP 匿名），配 key 提升额度 |
 | `firecrawl` | Firecrawl | 免费 | **无 key 也可用**（官方免 key 匿名额度），配 key 提升限额 |
@@ -343,10 +343,10 @@ Windows 用户：桌面快捷方式已内置此配置（`set NODE_USE_ENV_PROXY=
 
 <div align="center">
   <a href="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png">
-    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="Free Engine Settings (Bing)" width="820" />
+    <img src="https://raw.githubusercontent.com/Soulize/dsh-free-search/master/assets/settings-free1.png" alt="Free Search settings" width="820" />
   </a>
   <br>
-  <sub>▲ Free engine (using Bing as an example)</sub>
+  <sub>▲ Free Search settings UI</sub>
 </div>
 
 ### Why You Need It
@@ -383,12 +383,13 @@ If this fork is useful to you, consider starring [Soulize/dsh-free-search](https
 | id | Engine | Cost | Description |
 |---|---|---|---|
 | `auto` | Auto Smart Routing | Dynamic | **Smartly routes engines based on query language/time filter** (Chinese queries prioritize Bing/Baidu/Aliyun/AnySearch, English queries prioritize Bing/Exa/Tavily; time filters prioritize time-capable engines), with full fallback |
+| `multi` | Multi Search | Dynamic | **Queries the top 3 enabled routed/prioritized engines concurrently**, merges duplicate URLs, and boosts cross-engine confirmations |
 | `ddg` | DuckDuckGo HTML | Free | Occasional rate limits (anti-bot challenges); recovers automatically |
 | `ddg-lite` | DuckDuckGo Lite | Free | Lightweight version; same rate-limit behavior as above |
-| `bing` | Bing | Free | **Default engine**, most stable, optimized for Chinese (`zh-CN`) |
-| `anysearch` | AnySearch AI | Free | AI search, no key needed (anonymous quota) |
+| `bing` | Bing | Free | **Code default / compatibility fallback**, optimized for Chinese (`zh-CN`) |
+| `anysearch` | AnySearch AI | Free | **Recommended core engine in this fork**; lightweight AI search, no key needed (anonymous quota) |
 | `searxng` | SearXNG Meta Search | Free | Multi-instance automatic failover; supports custom instances |
-| `exa` | Exa | Free | **Usable without a key** (anonymous MCP); configure a key for higher quota |
+| `exa` | Exa | Free | **Recommended core engine in this fork**; semantic search, anonymous MCP without a key, higher quota with `EXA_API_KEY` |
 | `tavily` | Tavily | Free | **Usable without a key** (keyless anonymous); configure a key for higher quota |
 | `keenable` | Keenable | Free | **Usable without a key** (anonymous MCP); configure a key for higher quota |
 | `firecrawl` | Firecrawl | Free | **Usable without a key** (official keyless anonymous quota); configure a key for higher limits |
