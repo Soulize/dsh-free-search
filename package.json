@@ -1,6 +1,6 @@
 {
   "name": "dsh-free-search",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "DeepSeek Harness search plugin focused on Exa + AnySearch, with Multi Search, global engine controls, custom fallback priority, auto routing, compact dynamic prompts, and web settings UI.",
   "type": "module",
   "main": "lib/index.js",
