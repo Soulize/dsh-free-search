@@ -1,3 +1,5 @@
+autoInstallPeers: false
+
 minimumReleaseAgeExclude:
   - '@deepseek-ai/dsh-agent@0.1.7-rc.1'
   - '@deepseek-ai/dsh-app-boot@0.1.7-rc.1'
